@@ -48,7 +48,11 @@
     <p>שתמיד תהיה מוקף אהבה, בריאות ושמחה. שכל חלום ימריא כמו בלון גבוה לשמים, ותחגוג יום הולדת קסום ומיוחד ✨</p>
   </div>
 
-  <iframe id="bgMusic" width="0" height="0" src="https://www.youtube.com/embed/BoYXygn7LL0?autoplay=1&mute=1&loop=1&playlist=BoYXygn7LL0&playsinline=1&enablejsapi=1" frameborder="0" allow="autoplay; encrypted-media"></iframe>
+  <iframe id="bgMusic" width="0" height="0"
+  src="https://www.youtube.com/embed/BoYXygn7LL0?autoplay=1&mute=1&loop=1&playlist=BoYXygn7LL0&playsinline=1&enablejsapi=1"
+  frameborder="0"
+  allow="autoplay; encrypted-media; fullscreen; picture-in-picture">
+</iframe>
 
   <script>
     // Balloons with strings
@@ -109,10 +113,66 @@ document.addEventListener('pointerdown', (e) => {
 }, { passive: false });
 
     // YouTube API
-    let ytPlayer;function onYouTubeIframeAPIReady(){ytPlayer=new YT.Player('bgMusic',{events:{onReady:(e)=>{try{e.target.mute();e.target.playVideo();}catch(_){}}}});}
-    (function(){const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s);})();
-    const unlockAudio=()=>{try{if(ytPlayer&&ytPlayer.unMute){ytPlayer.unMute();ytPlayer.setVolume(70);}}catch(_){ }window.removeEventListener('pointerdown',unlockAudio);};
-    window.addEventListener('pointerdown',unlockAudio,{once:true});
+   let ytPlayer;
+
+function onYouTubeIframeAPIReady(){
+  ytPlayer = new YT.Player('bgMusic', {
+    events: {
+      onReady: (e) => {
+        try {
+          e.target.mute();
+          e.target.playVideo();
+        } catch(_) {}
+      },
+      onStateChange: (ev) => {
+        // אם נעצר/הסתיים – נסי להפעיל שוב
+        if (ev.data === YT.PlayerState.PAUSED || ev.data === YT.PlayerState.ENDED) {
+          try { ytPlayer.playVideo(); } catch(_) {}
+        }
+      }
+    }
+  });
+}
+
+// טוען את ה־API
+(function(){
+  const s = document.createElement('script');
+  s.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(s);
+})();
+
+// ביטול השתקה במחווה ראשונה + הבטחת ניגון
+const unmuteOnce = () => {
+  try {
+    if (ytPlayer && ytPlayer.unMute) {
+      ytPlayer.unMute();
+      ytPlayer.setVolume(70);
+      ytPlayer.playVideo();
+    }
+  } catch(_) {}
+  ['pointerdown','touchend','keydown'].forEach(ev =>
+    window.removeEventListener(ev, unmuteOnce, { capture:false })
+  );
+};
+['pointerdown','touchend','keydown'].forEach(ev =>
+  window.addEventListener(ev, unmuteOnce, { once:true, passive:false })
+);
+
+// כשחוזרים מה־background – המשך לנגן
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    setTimeout(() => { try { ytPlayer.playVideo(); } catch(_) {} }, 60);
+  }
+});
+
+// שמירה עדינה – כל 15 שניות ודאי שמנגן
+setInterval(() => {
+  try {
+    if (ytPlayer && ytPlayer.getPlayerState && ytPlayer.getPlayerState() !== 1) {
+      ytPlayer.playVideo();
+    }
+  } catch(_) {}
+}, 15000);
   </script>
 </body>
 </html>

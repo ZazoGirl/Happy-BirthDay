@@ -10,7 +10,6 @@
     html,body{height:100%;margin:0}
     body{font-family:system-ui, -apple-system, 'Heebo', Arial; background:radial-gradient(1200px 800px at 70% 10%, #1a1b36, var(--bg)); color:var(--white); overflow:hidden}
 
-    /* layout */
     .balloons{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
     .wrap{position:relative;height:100%;display:grid;place-items:center;padding:20px;z-index:2}
     .card{width:min(1000px,92vw);border-radius:24px;padding:24px;background:linear-gradient(180deg,#ffffff06,#ffffff02);backdrop-filter:blur(8px);box-shadow:0 20px 50px #0006;z-index:2}
@@ -18,20 +17,14 @@
     .subtitle{ text-align:center; font-weight:700; margin-bottom:6px }
     .photo{width:min(420px,70vw);aspect-ratio:4/5;margin:18px auto;border-radius:16px;overflow:hidden;position:relative}
 
-    /* balloons (lightweight) */
     .balloon{position:absolute;left:0;bottom:-20vh;border-radius:50%;opacity:.9;box-shadow:inset -6px -12px 16px #0002, 0 8px 18px rgba(0,0,0,.25);transform-origin:center bottom}
     @keyframes rise{0%{transform:translateY(0) scale(.98)}100%{transform:translateY(-140vh) scale(1)}}
 
-    /* controls */
-    .controls{position:fixed;left:12px;bottom:12px;z-index:3;display:flex;gap:8px}
-    .btn{background:#ffffff12;border:1px solid #ffffff20;padding:10px 14px;border-radius:12px;color:#fff;cursor:pointer}
+    .sparkle{position:absolute;width:6px;height:6px;background:var(--gold);box-shadow:0 0 8px #ffd16688;transform:rotate(45deg);opacity:.8;animation: pop 1.2s ease-out forwards}
+    @keyframes pop{0%{transform:translate(var(--x), var(--y)) scale(.6) rotate(0);opacity:1}100%{transform:translate(calc(var(--x)*2),calc(var(--y)*2)) scale(0) rotate(180deg);opacity:0}}
 
-    /* big play overlay (crucial) */
     #playOverlay{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.25));z-index:4}
     #playBtn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:18px 28px;border-radius:14px;font-size:18px;font-weight:800;color:#111;cursor:pointer}
-
-    /* avoid white flash on tap */
-    html,body{background-attachment:fixed}
   </style>
 </head>
 <body>
@@ -41,101 +34,109 @@
     <div class="card">
       <p class="subtitle">מזל טוב עד 120!</p>
       <h1 class="title">HAPPY BIRTHDAY 🎉</h1>
-      <div class="photo"><img id="photoImg" alt="תמונה" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 1000'%3E%3Crect width='100%25' height='100%25' fill='%2314162e'/%3E%3C/text%3E%3C/svg%3E" style="width:100%;height:100%;object-fit:cover;"/></div>
+      <div class="photo"><img id="photoImg" alt="תמונה" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 1000'%3E%3Crect width='100%25' height='100%25' fill='%2314162e'/%3E%3C/svg%3E" style="width:100%;height:100%;object-fit:cover;"/></div>
       <p style="text-align:center;max-width:60ch;margin:0 auto">שתמיד תהיי מוקפת אהבה, בריאות ושמחה. יום הולדת קסום! ✨</p>
     </div>
   </div>
 
-  <div class="controls">
-    <button class="btn" id="btnConfetti">קונפטי</button>
-    <button class="btn" id="btnReplay">עוד בלונים</button>
-  </div>
-
-  <!-- Play overlay: חובה ללחוץ פעם אחת כדי להפעיל סאונד בדפדפנים ניידים -->
   <div id="playOverlay"><button id="playBtn">הפעל מוזיקה וחגיגה</button></div>
 
-  <!-- Youtube iframe kept hidden; we control it from API after user tap -->
   <iframe id="bgMusic" width="0" height="0" src="https://www.youtube.com/embed/BoYXygn7LL0?enablejsapi=1&loop=1&playlist=BoYXygn7LL0&playsinline=1" frameborder="0" allow="autoplay; encrypted-media" aria-hidden="true"></iframe>
 
   <script>
-    // --- balloons simple stable implementation ---
+    // Balloons
     const colors = ['#ffaad9','#33d6ff','#ffd166','#70ff8a'];
     const balloonsRoot = document.getElementById('balloons');
     function createBalloon(x,size,color,delay,dur){
-      const b = document.createElement('div');
+      const b=document.createElement('div');
       b.className='balloon';
-      b.style.width = size+'px';
-      b.style.height = Math.round(size*1.25)+'px';
-      b.style.left = (x)+'px';
-      b.style.background = 'radial-gradient(circle at 30% 30%, rgba(255,255,255,.6), transparent 35%), '+color;
-      b.style.animation = `rise ${dur}s linear ${delay}s infinite`;
+      b.style.width=size+'px';
+      b.style.height=Math.round(size*1.25)+'px';
+      b.style.left=x+'px';
+      b.style.background='radial-gradient(circle at 30% 30%, rgba(255,255,255,.6), transparent 35%), '+color;
+      b.style.animation=`rise ${dur}s linear ${delay}s infinite`;
       balloonsRoot.appendChild(b);
       return b;
     }
     function addBalloons(count=18){
-      // clear and recreate to avoid stuck elements
-      // but keep max moderate to prevent lag
-      const max = 24;
+      const max=24;
       while(balloonsRoot.firstChild) balloonsRoot.removeChild(balloonsRoot.firstChild);
-      const W = window.innerWidth;
-      const n = Math.min(max, count);
+      const W=window.innerWidth;
+      const n=Math.min(max,count);
       for(let i=0;i<n;i++){
-        const size = 60 + Math.round(Math.random()*70);
-        const x = Math.random()*(W - size);
-        const c = colors[Math.floor(Math.random()*colors.length)];
-        const dur = 16 + Math.random()*10; // slow and steady
-        const delay = Math.random()*5;
+        const size=60+Math.round(Math.random()*70);
+        const x=Math.random()*(W-size);
+        const c=colors[Math.floor(Math.random()*colors.length)];
+        const dur=16+Math.random()*10;
+        const delay=Math.random()*5;
         createBalloon(x,size,c,delay,dur);
       }
     }
     addBalloons(18);
 
-    // Controls
-    document.getElementById('btnReplay').addEventListener('click', ()=>addBalloons(18));
-
-    // Confetti (reduced) on button only
+    // Confetti
     function confettiBurst(x,y){
-      const n=20;
+      const n=30;
       for(let i=0;i<n;i++){
         const s=document.createElement('div');
         s.className='sparkle';
-        s.style.left = x+'px'; s.style.top = y+'px';
-        s.style.width='6px'; s.style.height='6px'; s.style.background=(i%2? '#ff6ec7':'#ffd166');
+        const ang=Math.random()*Math.PI*2;
+        const r=40+Math.random()*160;
+        s.style.setProperty('--x',(Math.cos(ang)*r)+'px');
+        s.style.setProperty('--y',(Math.sin(ang)*r)+'px');
+        s.style.left=x+'px';
+        s.style.top=y+'px';
+        s.style.background=i%3===0?'#ff6ec7':(i%3===1?'#7cf7ff':'#ffd166');
         document.body.appendChild(s);
-        setTimeout(()=>s.remove(),900);
+        setTimeout(()=>s.remove(),1200);
       }
     }
-    document.getElementById('btnConfetti').addEventListener('click', ()=>confettiBurst(window.innerWidth/2, window.innerHeight/3));
 
-    // --- YouTube API for controlled unmute after user tap ---
-    let ytPlayerReady = false;
-    function onYouTubeIframeAPIReady(){ ytPlayerReady = true; }
-    (function(){ const s=document.createElement('script'); s.src='https://www.youtube.com/iframe_api'; document.head.appendChild(s); })();
-
-    // On play-overlay click: unmute & play; also recreate balloons to remove stuck ones
-    const playBtn = document.getElementById('playBtn');
-    playBtn.addEventListener('click', async ()=>{
-      // hide overlay immediately to avoid white flash
-      document.getElementById('playOverlay').style.display='none';
-
-      // try to control youtube iframe via postMessage if API not yet ready
-      const iframe = document.getElementById('bgMusic');
-      // send play command via postMessage
-      try{
-        iframe.contentWindow.postMessage(JSON.stringify({ event:'command', func:'playVideo' }), '*');
-        iframe.contentWindow.postMessage(JSON.stringify({ event:'command', func:'unMute' }), '*');
-        // set volume (best-effort)
-        iframe.contentWindow.postMessage(JSON.stringify({ event:'command', func:'setVolume', args:[65] }), '*');
-      }catch(e){/* ignore */}
-
-      // recreate balloons to ensure none stuck
-      addBalloons(18);
+    // Trigger confetti on any click
+    document.addEventListener('click',e=>{
+      confettiBurst(e.clientX||window.innerWidth/2,e.clientY||window.innerHeight/2);
     });
 
-    // prevent page-level tap highlighting / accidental focus causing white flash
-    document.addEventListener('touchstart', ()=>{}, {passive:true});
+    // Music control
+    let ytPlayerReady=false;
+    function onYouTubeIframeAPIReady(){ ytPlayerReady=true; }
+    (function(){const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)})();
 
-    // Helpful hint: if audio still silent, tap once anywhere (this is browser policy)
+    document.getElementById('playBtn').addEventListener('click',()=>{
+      document.getElementById('playOverlay').style.display='none';
+      const iframe=document.getElementById('bgMusic');
+      try{
+        iframe.contentWindow.postMessage(JSON.stringify({event:'command',func:'playVideo'}),'*');
+        iframe.contentWindow.postMessage(JSON.stringify({event:'command',func:'unMute'}),'*');
+        iframe.contentWindow.postMessage(JSON.stringify({event:'command',func:'setVolume',args:[65]}),'*');
+      }catch(e){}
+      addBalloons(18);
+    });
+  </script>
+  <script>
+    // הסרה/החבא של הכפתורים אם קיימים
+    (function(){
+      const c = document.querySelector('.controls');
+      if(c){ c.style.display='none'; }
+      const bc = document.getElementById('btnConfetti');
+      const br = document.getElementById('btnReplay');
+      if(bc) bc.remove();
+      if(br) br.remove();
+    })();
+
+    // קונפטי בכל נגיעה/לחיצה, עם הגנה מעומס
+    (function(){
+      let last = 0;
+      document.addEventListener('pointerdown', function(e){
+        const now = Date.now();
+        if(now - last > 160){
+          const x = e.clientX || innerWidth*0.5;
+          const y = e.clientY || innerHeight*0.35;
+          if(typeof confettiBurst === 'function') confettiBurst(x,y);
+          last = now;
+        }
+      });
+    })();
   </script>
 </body>
 </html>

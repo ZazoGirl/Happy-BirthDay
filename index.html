@@ -7,6 +7,9 @@
   <style>
     :root{--bg:#0f1020;--accent:#ff6ec7;--accent2:#7cf7ff;--gold:#ffd166;--white:#f8f9ff}
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html, body {
+    overscroll-behavior: none;  /* ⬅️ כאן ההוספה */
+    }
     body{margin:0;font-family:'Heebo',Arial,sans-serif;background:radial-gradient(1200px 800px at 70% 10%,#1a1b36,var(--bg));color:var(--white);overflow:hidden;height:100vh;display:flex;justify-content:center;align-items:center}
 
     .balloons{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
@@ -84,7 +87,15 @@
         setTimeout(()=>s.remove(),2000);
       }
     }
-    let last=0;document.addEventListener('pointerdown',e=>{const now=Date.now();if(now-last>100){confettiBurst(e.clientX||innerWidth/2,e.clientY||innerHeight/3);last=now;}});
+    let last = 0;
+document.addEventListener('pointerdown', (e) => {
+  e.preventDefault(); // מונע את הזזת הכרטיס/המסך
+  const now = Date.now();
+  if (now - last > 100) {
+    confettiBurst(e.clientX || innerWidth / 2, e.clientY || innerHeight / 3);
+    last = now;
+  }
+}, { passive: false });
 
     // YouTube API
     let ytPlayer;function onYouTubeIframeAPIReady(){ytPlayer=new YT.Player('bgMusic',{events:{onReady:(e)=>{try{e.target.mute();e.target.playVideo();}catch(_){}}}});}

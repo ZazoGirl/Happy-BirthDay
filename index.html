@@ -128,12 +128,17 @@
     <button class="btn" id="btnConfetti">קונפטי 🎊</button>
     <button class="btn" id="btnReplay">עוד בלונים 🎈</button>
   </div>
+  
+  <!-- Tap-to-unmute overlay for strict autoplay policies -->
+  <div id="tapOverlay" style="position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.35); backdrop-filter:blur(3px); z-index:20; visibility:hidden; opacity:0; transition:.25s ease;">
+    <div style="background:#ffffff12; border:1px solid #ffffff22; padding:14px 18px; border-radius:14px; font-weight:700;">
+      הקישי כדי להפעיל מוזיקה 🎵
+    </div>
+  </div>
 
-  <div id="yt-holder" style="position:fixed; inset:0; display:grid; place-items:center; pointer-events:none;">
-  <iframe id="bgMusic" width="0" height="0"
-    src="https://www.youtube.com/embed/BoYXygn7LL0?autoplay=1&mute=1&loop=1&playlist=BoYXygn7LL0&playsinline=1&enablejsapi=1"
-    frameborder="0" allow="autoplay; encrypted-media" title="Birthday Music"></iframe>
-</div>
+  <audio id="music" autoplay loop>
+    <source src="https://docs.google.com/uc?export=download&id=1Gj1nVEwVYFnbPb_w2cHBN_0tulIhnR9p" type="audio/mp3">
+  </audio>
 
   <script>
     const qp = new URLSearchParams(location.search);
@@ -160,7 +165,7 @@
     ];
 
     const balloonsRoot = document.getElementById('balloons');
-    function addBalloons(count = 18){
+    function addBalloons(count = 10){
       const W = window.innerWidth;
       for(let i=0;i<count;i++){
         const b = document.createElement('div');
@@ -175,10 +180,10 @@
         b.style.setProperty('--delay', delay);
         b.style.setProperty('--c', colors[Math.floor(Math.random()*colors.length)]);
         balloonsRoot.appendChild(b);
-        setTimeout(()=>{ b.remove(); }, 24000);
       }
     }
-    addBalloons(24);
+
+    setInterval(()=>addBalloons(5), 2000);
 
     function confettiBurst(x = innerWidth/2, y = innerHeight/3){
       const n = 90;
@@ -200,44 +205,45 @@
     document.getElementById('btnConfetti').addEventListener('click', e => {
       confettiBurst(innerWidth*0.5, innerHeight*0.35);
     });
-    document.getElementById('btnReplay').addEventListener('click', e => addBalloons(18));
+    document.getElementById('btnReplay').addEventListener('click', e => addBalloons(10));
 
     setTimeout(()=>confettiBurst(innerWidth*0.5, innerHeight*0.35), 700);
 
     document.addEventListener('click', (e)=>{
       confettiBurst(e.clientX, e.clientY);
     });
+  // Keep balloons flowing forever
+    setInterval(()=>addBalloons(6), 2500);
   </script>
+
   <script>
-    // --- YouTube autoplay strategy ---
-    // Browsers block autoplay with sound. We start muted, then unmute on first user interaction.
-    let ytPlayer;
-    function onYouTubeIframeAPIReady(){
-      ytPlayer = new YT.Player('bgMusic', {
-        events: {
-          onReady: (e)=>{
-            try{ e.target.mute(); e.target.playVideo(); }catch(err){}
-          }
-        }
-      });
-    }
-
-    // Load YT Iframe API
+    // Overlay logic – show prompt if sound is still muted after load
     (function(){
-      const s = document.createElement('script');
-      s.src = 'https://www.youtube.com/iframe_api';
-      document.head.appendChild(s);
-    })();
+      const overlay = document.getElementById('tapOverlay');
+      function show(){ overlay.style.visibility='visible'; overlay.style.opacity='1'; }
+      function hide(){ overlay.style.opacity='0'; setTimeout(()=>overlay.style.visibility='hidden', 250); }
 
-    // Unmute on first interaction anywhere on the page
-    const unlockAudio = ()=>{
-      try{ if(ytPlayer && ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(70); }
-      }catch(err){}
-      window.removeEventListener('pointerdown', unlockAudio);
-      window.removeEventListener('keydown', unlockAudio);
-    };
-    window.addEventListener('pointerdown', unlockAudio, { once:true });
-    window.addEventListener('keydown', unlockAudio, { once:true });
+      // Try to unmute programmatically (may fail due to policy); otherwise show prompt
+      const tryUnmute = ()=>{
+        try{
+          if(window.ytPlayer && ytPlayer.unMute && ytPlayer.isMuted){
+            if(ytPlayer.isMuted()){
+              show();
+            }else{
+              hide();
+            }
+          } else {
+            // YT not ready yet – try again soon
+            setTimeout(tryUnmute, 600);
+          }
+        }catch(e){ show(); }
+      };
+      setTimeout(tryUnmute, 1000);
+
+      // Clicking anywhere already un-mutes via existing listeners; also hide overlay on click
+      window.addEventListener('pointerdown', hide, { once:false });
+      window.addEventListener('keydown', hide, { once:false });
+    })();
   </script>
 </body>
 </html>

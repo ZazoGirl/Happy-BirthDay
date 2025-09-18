@@ -1,151 +1,141 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Happy Birthday! 🎈</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>מזל טוב 🎈</title>
   <style>
-    :root{ --bg:#0f1020; --bg2:#1a1b36; --accent:#ff6ec7; --accent2:#7cf7ff; --gold:#ffd166; --white:#f8f9ff; }
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    html,body{height:100%}
-    body{ margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, "Heebo", Arial, sans-serif; background:radial-gradient(1200px 800px at 70% 10%, var(--bg2), var(--bg)); color:var(--white); overflow:hidden; }
+    :root{--bg:#0f1020;--accent:#ff6ec7;--accent2:#7cf7ff;--gold:#ffd166;--white:#f8f9ff}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;margin:0}
+    body{font-family:system-ui, -apple-system, 'Heebo', Arial; background:radial-gradient(1200px 800px at 70% 10%, #1a1b36, var(--bg)); color:var(--white); overflow:hidden}
 
-    .stars, .stars:after{ content:""; position:fixed; inset:0; pointer-events:none; background-image: radial-gradient(2px 2px at 20px 30px, #ffffff55, transparent), radial-gradient(2px 2px at 130px 80px, #ffffff40, transparent), radial-gradient(1px 1px at 60px 140px, #ffffff30, transparent), radial-gradient(2px 2px at 240px 200px, #ffffff40, transparent), radial-gradient(1px 1px at 300px 260px, #ffffff30, transparent); animation: twinkle 6s linear infinite; mix-blend-mode:screen; }
-    .stars:after{ filter: blur(1px); opacity:.5; }
-    @keyframes twinkle{ 0%,100%{opacity:.8} 50%{opacity:.4} }
+    /* layout */
+    .balloons{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+    .wrap{position:relative;height:100%;display:grid;place-items:center;padding:20px;z-index:2}
+    .card{width:min(1000px,92vw);border-radius:24px;padding:24px;background:linear-gradient(180deg,#ffffff06,#ffffff02);backdrop-filter:blur(8px);box-shadow:0 20px 50px #0006;z-index:2}
+    .title{font-size:clamp(28px,6vw,56px);text-align:center;font-weight:900;background:linear-gradient(90deg,var(--accent),var(--gold),var(--accent2));-webkit-background-clip:text;color:transparent}
+    .subtitle{ text-align:center; font-weight:700; margin-bottom:6px }
+    .photo{width:min(420px,70vw);aspect-ratio:4/5;margin:18px auto;border-radius:16px;overflow:hidden;position:relative}
 
-    .wrap{ position:relative; height:100%; width:100%; display:grid; place-items:center; padding:clamp(16px,3vw,48px); }
-    .card{ position:relative; z-index:2; width:min(1000px,92vw); border-radius:28px; padding:clamp(18px,4vw,36px); background:linear-gradient(180deg,#ffffff08,#ffffff03); box-shadow:0 20px 60px #0006, inset 0 0 0 1px #ffffff18; backdrop-filter:blur(8px); overflow:hidden; }
+    /* balloons (lightweight) */
+    .balloon{position:absolute;left:0;bottom:-20vh;border-radius:50%;opacity:.9;box-shadow:inset -6px -12px 16px #0002, 0 8px 18px rgba(0,0,0,.25);transform-origin:center bottom}
+    @keyframes rise{0%{transform:translateY(0) scale(.98)}100%{transform:translateY(-140vh) scale(1)}}
 
-    .title{ font-size:clamp(36px,7vw,84px); line-height:1.05; margin:8px 0 6px; text-align:center; font-weight:900; background:linear-gradient(90deg,var(--accent),var(--gold),var(--accent2),var(--accent)); background-size:200% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:shine 8s linear infinite; letter-spacing:.02em; }
-    @keyframes shine{ 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
-    .subtitle{ text-align:center; font-size:clamp(18px,2.8vw,28px); opacity:.95; margin:0 0 4px; font-weight:700; text-shadow:0 0 10px #ffd16655, 0 0 18px #ff6ec733; }
-    .blessed{ margin:16px auto 0; max-width:65ch; text-align:center; font-size:clamp(16px,2.2vw,22px); opacity:.92; line-height:1.6; }
+    /* controls */
+    .controls{position:fixed;left:12px;bottom:12px;z-index:3;display:flex;gap:8px}
+    .btn{background:#ffffff12;border:1px solid #ffffff20;padding:10px 14px;border-radius:12px;color:#fff;cursor:pointer}
 
-    .photo{ width:min(420px,70vw); aspect-ratio:4/5; margin:clamp(16px,3vw,28px) auto; border-radius:22px; overflow:hidden; position:relative; box-shadow:0 12px 50px #0008, 0 0 0 1px #ffffff22 inset; background:#111; }
-    .photo img{ width:100%; height:100%; object-fit:cover; display:block; }
-    .glow{ position:absolute; inset:-4px; border-radius:24px; pointer-events:none; background:conic-gradient(from 0deg,var(--accent),var(--gold),var(--accent2),var(--accent)); filter:blur(14px); opacity:.45; animation: spin 12s linear infinite; }
-    @keyframes spin{ to{ transform:rotate(360deg); } }
+    /* big play overlay (crucial) */
+    #playOverlay{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.25));z-index:4}
+    #playBtn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:18px 28px;border-radius:14px;font-size:18px;font-weight:800;color:#111;cursor:pointer}
 
-    .balloons{ position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
-    .balloon{ position:absolute; bottom:-20%; width:var(--w); height:calc(var(--w) * 1.35); border-radius:50% 50% 48% 52% / 56% 52% 48% 44%; background: radial-gradient(circle at 30% 30%, #ffffffaa, transparent 35%), var(--c); box-shadow: inset -8px -16px 20px #0002, 0 10px 20px #0004; opacity:.9; will-change:transform; animation-fill-mode:both; animation: float var(--dur) linear var(--delay) infinite; }
-    @keyframes float{ 0%{ transform:translateY(0) translateX(0) rotate(0) } 50%{ transform:translateY(-50vh) translateX(20px) rotate(2deg) } 100%{ transform:translateY(-105vh) translateX(-10px) rotate(-2deg) } }
-
-    .sparkle{ position:absolute; width:6px; height:6px; background:var(--gold); box-shadow:0 0 8px #ffd16688; transform:rotate(45deg); opacity:.8; animation: pop 1.2s ease-out forwards; }
-    @keyframes pop{ 0%{ transform:translate(var(--x), var(--y)) scale(.6) rotate(0); opacity:1 } 100%{ transform:translate(calc(var(--x) * 2), calc(var(--y) * 2)) scale(0) rotate(180deg); opacity:0 } }
-
-    .controls{ position:fixed; left:12px; bottom:12px; display:flex; gap:8px; flex-wrap:wrap; z-index:10; }
-    .btn{ background:#ffffff12; color:#fff; border:1px solid #ffffff22; padding:10px 14px; border-radius:12px; cursor:pointer; backdrop-filter: blur(6px); font-weight:600; transition:.2s ease; font-size:14px; }
-    .btn:active{ transform:scale(.98) }
-    .btn:hover{ background:#ffffff20; }
-
-    @media (max-width:480px){ .photo{ aspect-ratio:1; } }
+    /* avoid white flash on tap */
+    html,body{background-attachment:fixed}
   </style>
 </head>
 <body>
-  <div class="stars"></div>
   <div class="balloons" id="balloons"></div>
 
   <div class="wrap">
     <div class="card">
-      <p class="subtitle" id="sub">מזל טוב עד 120!</p>
-      <h1 class="title" id="title">HAPPY BIRTHDAY 🎉</h1>
-
-      <div class="photo" id="photo">
-        <img id="photoImg" alt="תמונת יום הולדת" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ff6ec7'/%3E%3Cstop offset='1' stop-color='%237cf7ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='%2314162e' width='100%25' height='100%25'/%3E%3Ccircle cx='400' cy='500' r='280' fill='url(%23g)' opacity='0.18'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='64' font-family='Segoe UI, Roboto, Heebo, Arial' fill='%23ffffffCC'%3EHappy Birthday%3C/text%3E%3C/svg%3E"/>
-        <div class="glow" aria-hidden="true"></div>
-      </div>
-
-      <p class="blessed" id="bless">שתמיד תהיי מוקפת אהבה, בריאות ושמחה, שהחלומות שלך יקבלו כנפיים – והלב ירגיש בבית. יום הולדת קסום! ✨</p>
+      <p class="subtitle">מזל טוב עד 120!</p>
+      <h1 class="title">HAPPY BIRTHDAY 🎉</h1>
+      <div class="photo"><img id="photoImg" alt="תמונה" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 1000'%3E%3Crect width='100%25' height='100%25' fill='%2314162e'/%3E%3C/text%3E%3C/svg%3E" style="width:100%;height:100%;object-fit:cover;"/></div>
+      <p style="text-align:center;max-width:60ch;margin:0 auto">שתמיד תהיי מוקפת אהבה, בריאות ושמחה. יום הולדת קסום! ✨</p>
     </div>
   </div>
 
   <div class="controls">
-    <button class="btn" id="btnConfetti">קונפטי 🎊</button>
-    <button class="btn" id="btnReplay">עוד בלונים 🎈</button>
+    <button class="btn" id="btnConfetti">קונפטי</button>
+    <button class="btn" id="btnReplay">עוד בלונים</button>
   </div>
 
-  <!-- YouTube music (autoplay muted; unmute on first touch) -->
-  <iframe id="bgMusic" width="0" height="0" src="https://www.youtube.com/embed/BoYXygn7LL0?autoplay=1&mute=1&loop=1&playlist=BoYXygn7LL0&playsinline=1&enablejsapi=1" frameborder="0" allow="autoplay; encrypted-media" title="Birthday Music"></iframe>
+  <!-- Play overlay: חובה ללחוץ פעם אחת כדי להפעיל סאונד בדפדפנים ניידים -->
+  <div id="playOverlay"><button id="playBtn">הפעל מוזיקה וחגיגה</button></div>
+
+  <!-- Youtube iframe kept hidden; we control it from API after user tap -->
+  <iframe id="bgMusic" width="0" height="0" src="https://www.youtube.com/embed/BoYXygn7LL0?enablejsapi=1&loop=1&playlist=BoYXygn7LL0&playsinline=1" frameborder="0" allow="autoplay; encrypted-media" aria-hidden="true"></iframe>
 
   <script>
-    // Personalization via URL
-    const qp = new URLSearchParams(location.search);
-    const name = qp.get('name');
-    const phrase = qp.get('phrase');
-    const blessing = qp.get('blessing');
-    const image = qp.get('image');
-    const titleEl = document.getElementById('title');
-    const subEl = document.getElementById('sub');
-    const blessEl = document.getElementById('bless');
-    if(name){ titleEl.textContent = `HAPPY BIRTHDAY ${name}! 🎉`; }
-    if(phrase){ subEl.textContent = phrase; }
-    if(blessing){ blessEl.textContent = blessing; }
-    if(image){ document.getElementById('photoImg').src = image; }
-
-    // Balloons – lightweight & steady
-    const colors = [
-      'radial-gradient(circle at 30% 30%, #ffffffaa, transparent 35%), linear-gradient(180deg,#ffaad9,#ff6ec7)',
-      'radial-gradient(circle at 30% 30%, #ffffffaa, transparent 35%), linear-gradient(180deg,#a9f7ff,#33d6ff)',
-      'radial-gradient(circle at 30% 30%, #ffffffaa, transparent 35%), linear-gradient(180deg,#ffe58a,#ffd166)',
-      'radial-gradient(circle at 30% 30%, #ffffffaa, transparent 35%), linear-gradient(180deg,#b6ffa1,#70ff8a)'
-    ];
+    // --- balloons simple stable implementation ---
+    const colors = ['#ffaad9','#33d6ff','#ffd166','#70ff8a'];
     const balloonsRoot = document.getElementById('balloons');
-    function addBalloons(count = 18){
-      const max = 28; // לא עמוס – בלי לאגים
-      const current = balloonsRoot.children.length;
-      const toAdd = Math.max(0, Math.min(count, max - current));
+    function createBalloon(x,size,color,delay,dur){
+      const b = document.createElement('div');
+      b.className='balloon';
+      b.style.width = size+'px';
+      b.style.height = Math.round(size*1.25)+'px';
+      b.style.left = (x)+'px';
+      b.style.background = 'radial-gradient(circle at 30% 30%, rgba(255,255,255,.6), transparent 35%), '+color;
+      b.style.animation = `rise ${dur}s linear ${delay}s infinite`;
+      balloonsRoot.appendChild(b);
+      return b;
+    }
+    function addBalloons(count=18){
+      // clear and recreate to avoid stuck elements
+      // but keep max moderate to prevent lag
+      const max = 24;
+      while(balloonsRoot.firstChild) balloonsRoot.removeChild(balloonsRoot.firstChild);
       const W = window.innerWidth;
-      for(let i=0;i<toAdd;i++){
-        const b = document.createElement('div');
-        b.className = 'balloon';
-        const size = Math.round(60 + Math.random()*70);
-        const left = Math.random() * (W - size);
-        const durNum = 18 + Math.random()*12; // איטי יותר – חסכוני
-        const dur = durNum.toFixed(2) + 's';
-        const delay = (-Math.random()*durNum).toFixed(2) + 's';
-        b.style.setProperty('--w', size + 'px');
-        b.style.left = left + 'px';
-        b.style.setProperty('--dur', dur);
-        b.style.setProperty('--delay', delay);
-        b.style.setProperty('--c', colors[Math.floor(Math.random()*colors.length)]);
-        balloonsRoot.appendChild(b);
-      }
-    }
-    addBalloons(24);
-    // שמירת צפיפות עדינה בלבד
-    setInterval(()=>addBalloons(3), 3000);
-
-    // Confetti – only when pressing the button (לא בכל קליק על המסך)
-    function confettiBurst(x = innerWidth/2, y = innerHeight/3){
-      const n = 30; // פחות חלקיקים – פחות עומס
+      const n = Math.min(max, count);
       for(let i=0;i<n;i++){
-        const s = document.createElement('div');
-        s.className = 'sparkle';
-        const ang = Math.random() * Math.PI * 2;
-        const r = 40 + Math.random()*160;
-        s.style.setProperty('--x', (x + Math.cos(ang)*r) + 'px');
-        s.style.setProperty('--y', (y + Math.sin(ang)*r) + 'px');
-        s.style.left = x + 'px';
-        s.style.top = y + 'px';
-        s.style.background = i%3===0 ? '#ff6ec7' : (i%3===1 ? '#7cf7ff' : '#ffd166');
-        document.body.appendChild(s);
-        setTimeout(()=>s.remove(), 1200);
+        const size = 60 + Math.round(Math.random()*70);
+        const x = Math.random()*(W - size);
+        const c = colors[Math.floor(Math.random()*colors.length)];
+        const dur = 16 + Math.random()*10; // slow and steady
+        const delay = Math.random()*5;
+        createBalloon(x,size,c,delay,dur);
       }
     }
-    document.getElementById('btnConfetti').addEventListener('click', ()=>confettiBurst(innerWidth*0.5, innerHeight*0.35));
-    document.getElementById('btnReplay').addEventListener('click', ()=>addBalloons(6));
-    setTimeout(()=>confettiBurst(innerWidth*0.5, innerHeight*0.35), 700);
+    addBalloons(18);
 
-    // YouTube autoplay: start muted, unmute on first touch/keydown
-    let ytPlayer;
-    function onYouTubeIframeAPIReady(){
-      ytPlayer = new YT.Player('bgMusic', { events:{ onReady:(e)=>{ try{ e.target.mute(); e.target.playVideo(); }catch(_){} } } });
+    // Controls
+    document.getElementById('btnReplay').addEventListener('click', ()=>addBalloons(18));
+
+    // Confetti (reduced) on button only
+    function confettiBurst(x,y){
+      const n=20;
+      for(let i=0;i<n;i++){
+        const s=document.createElement('div');
+        s.className='sparkle';
+        s.style.left = x+'px'; s.style.top = y+'px';
+        s.style.width='6px'; s.style.height='6px'; s.style.background=(i%2? '#ff6ec7':'#ffd166');
+        document.body.appendChild(s);
+        setTimeout(()=>s.remove(),900);
+      }
     }
+    document.getElementById('btnConfetti').addEventListener('click', ()=>confettiBurst(window.innerWidth/2, window.innerHeight/3));
+
+    // --- YouTube API for controlled unmute after user tap ---
+    let ytPlayerReady = false;
+    function onYouTubeIframeAPIReady(){ ytPlayerReady = true; }
     (function(){ const s=document.createElement('script'); s.src='https://www.youtube.com/iframe_api'; document.head.appendChild(s); })();
-    const unlockAudio=()=>{ try{ if(ytPlayer&&ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(70); } }catch(_){}; window.removeEventListener('pointerdown',unlockAudio); window.removeEventListener('keydown',unlockAudio); };
-    window.addEventListener('pointerdown',unlockAudio,{once:true});
-    window.addEventListener('keydown',unlockAudio,{once:true});
+
+    // On play-overlay click: unmute & play; also recreate balloons to remove stuck ones
+    const playBtn = document.getElementById('playBtn');
+    playBtn.addEventListener('click', async ()=>{
+      // hide overlay immediately to avoid white flash
+      document.getElementById('playOverlay').style.display='none';
+
+      // try to control youtube iframe via postMessage if API not yet ready
+      const iframe = document.getElementById('bgMusic');
+      // send play command via postMessage
+      try{
+        iframe.contentWindow.postMessage(JSON.stringify({ event:'command', func:'playVideo' }), '*');
+        iframe.contentWindow.postMessage(JSON.stringify({ event:'command', func:'unMute' }), '*');
+        // set volume (best-effort)
+        iframe.contentWindow.postMessage(JSON.stringify({ event:'command', func:'setVolume', args:[65] }), '*');
+      }catch(e){/* ignore */}
+
+      // recreate balloons to ensure none stuck
+      addBalloons(18);
+    });
+
+    // prevent page-level tap highlighting / accidental focus causing white flash
+    document.addEventListener('touchstart', ()=>{}, {passive:true});
+
+    // Helpful hint: if audio still silent, tap once anywhere (this is browser policy)
   </script>
 </body>
 </html>

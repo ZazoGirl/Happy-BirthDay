@@ -22,7 +22,6 @@
       overflow:hidden;
     }
 
-    /* Subtle star field */
     .stars, .stars:after{
       content:""; position:fixed; inset:0; pointer-events:none;
       background-image: radial-gradient(2px 2px at 20px 30px, #ffffff55, transparent),
@@ -36,7 +35,6 @@
     .stars:after{ filter: blur(1px); opacity:.5; }
     @keyframes twinkle{ 0%,100%{opacity:.8} 50%{opacity:.4} }
 
-    /* Center stage */
     .wrap{
       position:relative; height:100%; width:100%; display:grid; place-items:center; padding: clamp(16px, 3vw, 48px);
     }
@@ -48,7 +46,6 @@
       overflow:hidden;
     }
 
-    /* Title */
     .title{
       font-size: clamp(36px, 7vw, 84px);
       line-height:1.05; margin: 8px 0 6px; text-align:center; font-weight:900;
@@ -69,7 +66,6 @@
       opacity:.92; line-height:1.6;
     }
 
-    /* Photo frame */
     .photo{
       width:min(420px, 70vw); aspect-ratio: 4/5; margin: clamp(16px, 3vw, 28px) auto; border-radius:22px; overflow:hidden;
       position:relative; box-shadow: 0 12px 50px #0008, 0 0 0 1px #ffffff22 inset;
@@ -82,7 +78,6 @@
     }
     @keyframes spin{ to{ transform: rotate(360deg); } }
 
-    /* Floating balloons */
     .balloons{ position:fixed; inset:0; overflow:hidden; pointer-events:none; }
     .balloon{ position:absolute; bottom:-160px; width: var(--w); height: calc(var(--w) * 1.35); border-radius: 50% 50% 48% 52% / 56% 52% 48% 44%;
       background: radial-gradient(circle at 30% 30%, #ffffffaa, transparent 35%), var(--c);
@@ -96,11 +91,9 @@
       100%{ transform: translateY(-110vh) translateX(-10px) rotate(-2deg); }
     }
 
-    /* Confetti sparkles */
     .sparkle{ position:absolute; width:6px; height:6px; background:var(--gold); box-shadow:0 0 8px #ffd166aa; transform:rotate(45deg); opacity:.8; animation: pop 1.8s ease-out forwards; }
     @keyframes pop{ 0%{ transform:translate(var(--x), var(--y)) scale(.6) rotate(0); opacity:1 } 100%{ transform:translate(calc(var(--x) * 2), calc(var(--y) * 2)) scale(0) rotate(180deg); opacity:0 } }
 
-    /* Footer credit / controls */
     .controls{
       position:fixed; left:12px; bottom:12px; display:flex; gap:8px; flex-wrap:wrap; z-index:10;
     }
@@ -110,7 +103,6 @@
     }
     .btn:hover{ background:#ffffff20; transform: translateY(-1px); }
 
-    /* Responsive helpers */
     @media (max-width:480px){ .photo{ aspect-ratio:1; } }
   </style>
 </head>
@@ -135,11 +127,11 @@
   <div class="controls">
     <button class="btn" id="btnConfetti">קונפטי 🎊</button>
     <button class="btn" id="btnReplay">עוד בלונים 🎈</button>
-    <button class="btn" id="btnShare">שיתוף 🔗</button>
   </div>
 
+  <iframe id="bgMusic" width="0" height="0" src="https://www.youtube.com/embed/BoYXygn7LL0?autoplay=1&loop=1&playlist=BoYXygn7LL0" frameborder="0" allow="autoplay"></iframe>
+
   <script>
-    // --- Simple helpers: query params for personalization ---
     const qp = new URLSearchParams(location.search);
     const name = qp.get('name');
     const phrase = qp.get('phrase');
@@ -156,7 +148,6 @@
     if(blessing){ blessEl.textContent = blessing; }
     if(image){ document.getElementById('photoImg').src = image; }
 
-    // --- Balloons generator ---
     const colors = [
       'radial-gradient(circle at 30% 30%, #ffffffaa, transparent 35%), linear-gradient(180deg,#ffaad9,#ff6ec7)',
       'radial-gradient(circle at 30% 30%, #ffffffaa, transparent 35%), linear-gradient(180deg,#a9f7ff,#33d6ff)',
@@ -180,13 +171,11 @@
         b.style.setProperty('--delay', delay);
         b.style.setProperty('--c', colors[Math.floor(Math.random()*colors.length)]);
         balloonsRoot.appendChild(b);
-        // auto cleanup after one cycle
         setTimeout(()=>{ b.remove(); }, 24000);
       }
     }
     addBalloons(24);
 
-    // --- Sparkle/confetti burst ---
     function confettiBurst(x = innerWidth/2, y = innerHeight/3){
       const n = 90;
       for(let i=0;i<n;i++){
@@ -204,28 +193,13 @@
       }
     }
 
-    // --- Buttons ---
     document.getElementById('btnConfetti').addEventListener('click', e => {
       confettiBurst(innerWidth*0.5, innerHeight*0.35);
     });
     document.getElementById('btnReplay').addEventListener('click', e => addBalloons(18));
-    document.getElementById('btnShare').addEventListener('click', async () => {
-      const url = new URL(location.href);
-      // keep current personalization in URL
-      try{
-        if(navigator.share){
-          await navigator.share({ title: 'Happy Birthday', text: 'בואי לחגוג איתי 🎉', url: url.toString() });
-        } else {
-          await navigator.clipboard.writeText(url.toString());
-          alert('הלינק הועתק להעתקה.');
-        }
-      }catch(err){ /* user canceled */ }
-    });
 
-    // First entrance confetti
     setTimeout(()=>confettiBurst(innerWidth*0.5, innerHeight*0.35), 700);
 
-    // Click to spawn sparkles
     document.addEventListener('click', (e)=>{
       confettiBurst(e.clientX, e.clientY);
     });

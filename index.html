@@ -10,14 +10,25 @@
     body{margin:0;font-family:'Heebo',Arial,sans-serif;background:radial-gradient(1200px 800px at 70% 10%,#1a1b36,var(--bg));color:var(--white);overflow:hidden;height:100vh;display:flex;justify-content:center;align-items:center}
 
     .balloons{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-    .balloon{position:absolute;bottom:-20vh;width:var(--w);height:calc(var(--w)*1.35);border-radius:50% 50% 48% 52% / 56% 52% 48% 44%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.6),transparent 35%),var(--c);box-shadow:inset -6px -12px 16px #0002,0 8px 18px rgba(0,0,0,.25);opacity:.9;transform-origin:center bottom;animation:rise var(--dur) linear var(--delay) infinite;will-change:transform}
-    .string{position:absolute;width:2px;height:60px;background:#fff3;left:50%;top:100%;transform:translateX(-50%)}
+    .balloon{position:absolute;bottom:-20vh;width:var(--w);height:var(--h);border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.6),transparent 35%),var(--c);box-shadow:inset -6px -12px 16px #0002,0 8px 18px rgba(0,0,0,.25);opacity:.95;transform-origin:center bottom;animation:rise var(--dur) linear var(--delay) infinite;will-change:transform}
+    .balloon::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);width:2px;height:calc(var(--h) * .7);background:linear-gradient(#ffffff80,#ffffff20);border-radius:2px;opacity:.9}
+    .balloon::before{content:"";position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #5558;border-radius:2px}
     @keyframes rise{0%{transform:translateY(0)}100%{transform:translateY(-140vh)}}
 
-    .card{position:relative;z-index:2;text-align:center;padding:32px;border-radius:24px;backdrop-filter:blur(10px);background:linear-gradient(180deg,#ffffff0f,#ffffff05);box-shadow:0 12px 40px #000a;max-width:600px}
+    .card{position:relative;z-index:2;text-align:center;padding:32px;border-radius:24px;backdrop-filter:blur(10px);background:linear-gradient(180deg,#ffffff0f,#ffffff05);box-shadow:0 12px 40px #000a;max-width:640px;width:90%}
     .card h1{font-size:clamp(32px,8vw,72px);font-weight:900;margin:0;background:linear-gradient(90deg,var(--accent),var(--gold),var(--accent2));-webkit-background-clip:text;color:transparent}
     .card h2{margin:6px 0 18px;font-size:20px;font-weight:600;opacity:.9}
     .card p{font-size:18px;line-height:1.5;max-width:50ch;margin:0 auto}
+
+    .photo{width:min(520px,74vw);aspect-ratio:1/1;margin:18px auto;border-radius:24px;overflow:hidden;position:relative;box-shadow:0 18px 60px #0008,0 0 0 1px #ffffff22 inset;background:linear-gradient(145deg,#0e1030,#0a0c22);display:grid;place-items:center}
+    .photo::before{content:"";position:absolute;inset:-2px;border-radius:26px;padding:2px;background:linear-gradient(120deg,#ff6ec7,#ffd166,#7cf7ff,#ff6ec7);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderShift 10s linear infinite}
+    .photo .inner{position:relative;width:92%;height:92%;border-radius:20px;overflow:hidden;display:grid;place-items:center;background:radial-gradient(120px 120px at 70% 30%,#ffffff0e,transparent),radial-gradient(80px 80px at 30% 70%,#ffffff10,transparent)}
+    .photo h2{margin:0;font-size:clamp(22px,4.4vw,36px);letter-spacing:.5px;color:#f7f8ff;text-align:center}
+    .photo p{margin:6px 0 0;opacity:.85;text-align:center}
+    @keyframes borderShift{to{filter:hue-rotate(360deg)}}
+
+    .sparkle{position:absolute;width:6px;height:6px;background:var(--gold);transform:rotate(45deg);opacity:.85;animation:pop 1s ease-out forwards}
+    @keyframes pop{0%{transform:translate(var(--x),var(--y)) scale(.7) rotate(0)}100%{transform:translate(calc(var(--x)*2),calc(var(--y)*2)) scale(0) rotate(180deg);opacity:0}}
   </style>
 </head>
 <body>
@@ -26,6 +37,13 @@
   <div class="card">
     <h2>מזל טוב עד 120!</h2>
     <h1>HAPPY BIRTHDAY 🎉</h1>
+    <div class="photo">
+      <div class="inner">
+        <div style="font-size:clamp(44px,10vw,72px);">🎂</div>
+        <h2>Happy Birthday</h2>
+        <p>Love • Joy • Magic ✨</p>
+      </div>
+    </div>
     <p>שתמיד תהיי מוקפת אהבה, בריאות ושמחה. שכל חלום ימריא כמו בלון גבוה לשמים, ותחגגי יום הולדת קסום ומיוחד ✨</p>
   </div>
 
@@ -34,7 +52,7 @@
   <script>
     // Balloons with strings
     const balloonsRoot=document.getElementById('balloons');
-    const colors=['#ffaad9','#33d6ff','#ffd166','#70ff8a'];
+    const colors=['#ff8ecf','#5ad6ff','#ffd166','#86ff9e'];
     function addBalloons(n=20){
       balloonsRoot.innerHTML='';
       const W=innerWidth;
@@ -48,11 +66,11 @@
         b.style.setProperty('--dur',dur.toFixed(2)+'s');
         b.style.setProperty('--delay',(-delay).toFixed(2)+'s');
         b.style.setProperty('--w',size+'px');
+        b.style.setProperty('--h',Math.round(size*1.25)+'px');
         b.style.left=left+'px';
-        b.style.setProperty('--c',colors[Math.floor(Math.random()*colors.length)]);
-        const s=document.createElement('div');
-        s.className='string';
-        b.appendChild(s);
+        const c1=colors[Math.floor(Math.random()*colors.length)];
+        const c2=colors[Math.floor(Math.random()*colors.length)];
+        b.style.setProperty('--c',`linear-gradient(180deg, ${c1}, ${c2})`);
         balloonsRoot.appendChild(b);
       }
     }
@@ -66,14 +84,11 @@
         s.className='sparkle';
         const ang=Math.random()*Math.PI*2;
         const r=40+Math.random()*140;
-        s.style.position='absolute';
         s.style.left=x+'px';
         s.style.top=y+'px';
-        s.style.width='6px';s.style.height='6px';
-        s.style.background=i%3===0?'#ff6ec7':(i%3===1?'#7cf7ff':'#ffd166');
         s.style.setProperty('--x',(x+Math.cos(ang)*r)+'px');
         s.style.setProperty('--y',(y+Math.sin(ang)*r)+'px');
-        s.style.animation='pop 1s ease-out forwards';
+        s.style.background=i%3===0?'#ff6ec7':(i%3===1?'#7cf7ff':'#ffd166');
         document.body.appendChild(s);
         setTimeout(()=>s.remove(),1000);
       }

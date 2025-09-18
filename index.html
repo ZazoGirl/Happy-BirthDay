@@ -8,135 +8,52 @@
     :root{--bg:#0f1020;--accent:#ff6ec7;--accent2:#7cf7ff;--gold:#ffd166;--white:#f8f9ff}
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{height:100%;margin:0}
-    body{font-family:system-ui, -apple-system, 'Heebo', Arial; background:radial-gradient(1200px 800px at 70% 10%, #1a1b36, var(--bg)); color:var(--white); overflow:hidden}
-
+    body{font-family:system-ui,-apple-system,'Heebo',Arial;background:radial-gradient(1200px 800px at 70% 10%,#1a1b36,var(--bg));color:var(--white);overflow:hidden}
     .balloons{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
     .wrap{position:relative;height:100%;display:grid;place-items:center;padding:20px;z-index:2}
     .card{width:min(1000px,92vw);border-radius:24px;padding:24px;background:linear-gradient(180deg,#ffffff06,#ffffff02);backdrop-filter:blur(8px);box-shadow:0 20px 50px #0006;z-index:2}
     .title{font-size:clamp(28px,6vw,56px);text-align:center;font-weight:900;background:linear-gradient(90deg,var(--accent),var(--gold),var(--accent2));-webkit-background-clip:text;color:transparent}
-    .subtitle{ text-align:center; font-weight:700; margin-bottom:6px }
+    .subtitle{text-align:center;font-weight:700;margin-bottom:6px}
     .photo{width:min(420px,70vw);aspect-ratio:4/5;margin:18px auto;border-radius:16px;overflow:hidden;position:relative}
-
-    .balloon{position:absolute;left:0;bottom:-20vh;border-radius:50%;opacity:.9;box-shadow:inset -6px -12px 16px #0002, 0 8px 18px rgba(0,0,0,.25);transform-origin:center bottom}
+    .balloon{position:absolute;left:0;bottom:-20vh;border-radius:50%;opacity:.9;box-shadow:inset -6px -12px 16px #0002,0 8px 18px rgba(0,0,0,.25);transform-origin:center bottom;animation:rise var(--dur) linear var(--delay) infinite;will-change:transform}
     @keyframes rise{0%{transform:translateY(0) scale(.98)}100%{transform:translateY(-140vh) scale(1)}}
-
-    .sparkle{position:absolute;width:6px;height:6px;background:var(--gold);box-shadow:0 0 8px #ffd16688;transform:rotate(45deg);opacity:.8;animation: pop 1.2s ease-out forwards}
-    @keyframes pop{0%{transform:translate(var(--x), var(--y)) scale(.6) rotate(0);opacity:1}100%{transform:translate(calc(var(--x)*2),calc(var(--y)*2)) scale(0) rotate(180deg);opacity:0}}
-
-    #playOverlay{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.25));z-index:4}
-    #playBtn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:18px 28px;border-radius:14px;font-size:18px;font-weight:800;color:#111;cursor:pointer}
+    .sparkle{position:absolute;width:6px;height:6px;background:var(--gold);transform:rotate(45deg);opacity:.85;animation:pop 1s ease-out forwards}
+    @keyframes pop{0%{transform:translate(var(--x),var(--y)) scale(.7) rotate(0)}100%{transform:translate(calc(var(--x)*2),calc(var(--y)*2)) scale(0) rotate(180deg);opacity:0}}
   </style>
 </head>
 <body>
   <div class="balloons" id="balloons"></div>
-
   <div class="wrap">
     <div class="card">
       <p class="subtitle">מזל טוב עד 120!</p>
       <h1 class="title">HAPPY BIRTHDAY 🎉</h1>
-      <div class="photo"><img id="photoImg" alt="תמונה" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 1000'%3E%3Crect width='100%25' height='100%25' fill='%2314162e'/%3E%3C/svg%3E" style="width:100%;height:100%;object-fit:cover;"/></div>
+      <div class="photo"><img id="photoImg" alt="" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 1000'%3E%3Crect width='100%25' height='100%25' fill='%2314162e'/%3E%3C/svg%3E" style="width:100%;height:100%;object-fit:cover"/></div>
       <p style="text-align:center;max-width:60ch;margin:0 auto">שתמיד תהיי מוקפת אהבה, בריאות ושמחה. יום הולדת קסום! ✨</p>
     </div>
   </div>
 
-  <div id="playOverlay"><button id="playBtn">הפעל מוזיקה וחגיגה</button></div>
-
-  <iframe id="bgMusic" width="0" height="0" src="https://www.youtube.com/embed/BoYXygn7LL0?enablejsapi=1&loop=1&playlist=BoYXygn7LL0&playsinline=1" frameborder="0" allow="autoplay; encrypted-media" aria-hidden="true"></iframe>
+  <!-- Hidden YouTube player -->
+  <iframe id="bgMusic" width="0" height="0" src="https://www.youtube.com/embed/BoYXygn7LL0?autoplay=1&mute=1&loop=1&playlist=BoYXygn7LL0&playsinline=1&enablejsapi=1" frameborder="0" allow="autoplay; encrypted-media"></iframe>
 
   <script>
-    // Balloons
-    const colors = ['#ffaad9','#33d6ff','#ffd166','#70ff8a'];
-    const balloonsRoot = document.getElementById('balloons');
-    function createBalloon(x,size,color,delay,dur){
-      const b=document.createElement('div');
-      b.className='balloon';
-      b.style.width=size+'px';
-      b.style.height=Math.round(size*1.25)+'px';
-      b.style.left=x+'px';
-      b.style.background='radial-gradient(circle at 30% 30%, rgba(255,255,255,.6), transparent 35%), '+color;
-      b.style.animation=`rise ${dur}s linear ${delay}s infinite`;
-      balloonsRoot.appendChild(b);
-      return b;
-    }
-    function addBalloons(count=18){
-      const max=24;
-      while(balloonsRoot.firstChild) balloonsRoot.removeChild(balloonsRoot.firstChild);
-      const W=window.innerWidth;
-      const n=Math.min(max,count);
-      for(let i=0;i<n;i++){
-        const size=60+Math.round(Math.random()*70);
-        const x=Math.random()*(W-size);
-        const c=colors[Math.floor(Math.random()*colors.length)];
-        const dur=16+Math.random()*10;
-        const delay=Math.random()*5;
-        createBalloon(x,size,c,delay,dur);
-      }
-    }
-    addBalloons(18);
+    // Balloons minimal & smooth
+    const balloonsRoot=document.getElementById('balloons');
+    const colors=['#ffaad9','#33d6ff','#ffd166','#70ff8a'];
+    function addBalloons(n=22){
+      balloonsRoot.innerHTML='';
+      const W=innerWidth; for(let i=0;i<n;i++){ const size=60+Math.round(Math.random()*70); const left=Math.random()*(W-size); const dur=16+Math.random()*10; const delay=Math.random()*8; const b=document.createElement('div'); b.className='balloon'; b.style.setProperty('--dur', dur.toFixed(2)+'s'); b.style.setProperty('--delay', (-delay).toFixed(2)+'s'); b.style.width=size+'px'; b.style.height=Math.round(size*1.25)+'px'; b.style.left=left+'px'; b.style.background=`radial-gradient(circle at 30% 30%, rgba(255,255,255,.6), transparent 35%), ${colors[Math.floor(Math.random()*colors.length)]}`; balloonsRoot.appendChild(b);} }
+    addBalloons();
 
-    // Confetti
-    function confettiBurst(x,y){
-      const n=30;
-      for(let i=0;i<n;i++){
-        const s=document.createElement('div');
-        s.className='sparkle';
-        const ang=Math.random()*Math.PI*2;
-        const r=40+Math.random()*160;
-        s.style.setProperty('--x',(Math.cos(ang)*r)+'px');
-        s.style.setProperty('--y',(Math.sin(ang)*r)+'px');
-        s.style.left=x+'px';
-        s.style.top=y+'px';
-        s.style.background=i%3===0?'#ff6ec7':(i%3===1?'#7cf7ff':'#ffd166');
-        document.body.appendChild(s);
-        setTimeout(()=>s.remove(),1200);
-      }
-    }
+    // Confetti everywhere (throttled)
+    function confettiBurst(x,y){ const n=24; for(let i=0;i<n;i++){ const s=document.createElement('div'); s.className='sparkle'; const ang=Math.random()*Math.PI*2; const r=40+Math.random()*140; s.style.setProperty('--x',(x+Math.cos(ang)*r)+'px'); s.style.setProperty('--y',(y+Math.sin(ang)*r)+'px'); s.style.left=x+'px'; s.style.top=y+'px'; s.style.background=i%3===0?'#ff6ec7':(i%3===1?'#7cf7ff':'#ffd166'); document.body.appendChild(s); setTimeout(()=>s.remove(),1000);} }
+    setTimeout(()=>confettiBurst(innerWidth*0.5, innerHeight*0.35), 700);
+    let last=0; document.addEventListener('pointerdown',e=>{ const now=Date.now(); if(now-last>160){ confettiBurst(e.clientX||innerWidth*0.5, e.clientY||innerHeight*0.35); last=now; }});
 
-    // Trigger confetti on any click
-    document.addEventListener('click',e=>{
-      confettiBurst(e.clientX||window.innerWidth/2,e.clientY||window.innerHeight/2);
-    });
-
-    // Music control
-    let ytPlayerReady=false;
-    function onYouTubeIframeAPIReady(){ ytPlayerReady=true; }
-    (function(){const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)})();
-
-    document.getElementById('playBtn').addEventListener('click',()=>{
-      document.getElementById('playOverlay').style.display='none';
-      const iframe=document.getElementById('bgMusic');
-      try{
-        iframe.contentWindow.postMessage(JSON.stringify({event:'command',func:'playVideo'}),'*');
-        iframe.contentWindow.postMessage(JSON.stringify({event:'command',func:'unMute'}),'*');
-        iframe.contentWindow.postMessage(JSON.stringify({event:'command',func:'setVolume',args:[65]}),'*');
-      }catch(e){}
-      addBalloons(18);
-    });
-  </script>
-  <script>
-    // הסרה/החבא של הכפתורים אם קיימים
-    (function(){
-      const c = document.querySelector('.controls');
-      if(c){ c.style.display='none'; }
-      const bc = document.getElementById('btnConfetti');
-      const br = document.getElementById('btnReplay');
-      if(bc) bc.remove();
-      if(br) br.remove();
-    })();
-
-    // קונפטי בכל נגיעה/לחיצה, עם הגנה מעומס
-    (function(){
-      let last = 0;
-      document.addEventListener('pointerdown', function(e){
-        const now = Date.now();
-        if(now - last > 160){
-          const x = e.clientX || innerWidth*0.5;
-          const y = e.clientY || innerHeight*0.35;
-          if(typeof confettiBurst === 'function') confettiBurst(x,y);
-          last = now;
-        }
-      });
-    })();
+    // YouTube API – autoplay muted, unmute on first interaction
+    let ytPlayer; function onYouTubeIframeAPIReady(){ ytPlayer=new YT.Player('bgMusic',{events:{ onReady:(e)=>{ try{ e.target.mute(); e.target.playVideo(); }catch(_){ } } }}); }
+    (function(){ const s=document.createElement('script'); s.src='https://www.youtube.com/iframe_api'; document.head.appendChild(s); })();
+    const unlockAudio=()=>{ try{ if(ytPlayer&&ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(70); } }catch(_){ } window.removeEventListener('pointerdown',unlockAudio); window.removeEventListener('keydown',unlockAudio); };
+    window.addEventListener('pointerdown',unlockAudio,{once:true}); window.addEventListener('keydown',unlockAudio,{once:true});
   </script>
 </body>
 </html>
